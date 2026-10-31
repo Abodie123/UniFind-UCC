@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sell on UniFind UCC</title>
+<link rel="icon" href="icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#F5F3FF;padding-bottom:80px}
+.header{background:linear-gradient(135deg,#6D28D9,#EC4899);color:white;padding:14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.header a{color:white;text-decoration:none;background:rgba(255,255,255,.2);padding:6px 12px;border-radius:20px}
+.form-box{background:white;margin:14px;border-radius:20px;padding:18px;box-shadow:0 8px 24px rgba(109,40,217,.1)}
+.input{width:100%;padding:12px;border:1px solid #E9D5FF;border-radius:12px;margin-bottom:12px;outline:none}
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.upload-box{border:2px dashed #C4B5FD;border-radius:12px;padding:10px;text-align:center;background:#F5F3FF;cursor:pointer;min-height:110px;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative}
+.upload-box img{width:100%;height:90px;object-fit:cover;border-radius:8px;display:none;margin-top:6px}
+.upload-box.has-img{border-style:solid;border-color:#7C3AED;background:white}
+.btn-main{width:100%;background:linear-gradient(90deg,#7C3AED,#F97316);color:white;border:none;padding:14px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer}
+.btn-main:disabled{background:#ccc}
+.badge-info{background:#FEF3C7;color:#92400E;padding:10px;border-radius:12px;font-size:11px;margin-bottom:12px;line-height:1.5}
+.momo-box{display:none;background:#ECFDF5;border:2px solid #10B981;border-radius:12px;padding:12px;margin-bottom:12px}
+.momo-box.show{display:block}
+.momo-title{color:#065F46;font-weight:700;font-size:13px}
+.momo-num{background:white;padding:8px;border-radius:8px;text-align:center;font-weight:800;font-size:18px;margin:8px 0;color:#7C3AED;border:1px dashed #7C3AED}
+.proof-preview{width:100%;max-height:150px;object-fit:contain;border-radius:8px;display:none;margin-top:8px;border:1px solid #10B981}
+</style>
+</head>
+<body>
+<div class="header">
+ <div style="display:flex;align-items:center;gap:8px"><b>UniFind - Sell</b></div>
+ <a href="index.html">← Home</a>
+</div>
+
+<div class="form-box">
+ <h3>📦 Post Product - UCC</h3>
+ <div class="badge-info">✅ Add up to 4 photos • First = Main • All 4 show inside<br>📍 Amamoma & School Bus Road added<br>💬 Sales via WhatsApp Only • No Commission Delay</div>
+
+ <label>Product Photos (1-4)</label>
+ <div class="upload-grid" id="uploadGrid">
+   <div class="upload-box" data-index="0"><div class="txt">📸 Photo 1<br><small>Main - index</small></div><img id="preview0"></div>
+   <div class="upload-box" data-index="1"><div class="txt">📸 Photo 2<br><small>Optional</small></div><img id="preview1"></div>
+   <div class="upload-box" data-index="2"><div class="txt">📸 Photo 3<br><small>Optional</small></div><img id="preview2"></div>
+   <div class="upload-box" data-index="3"><div class="txt">📸 Photo 4<br><small>Optional</small></div><img id="preview3"></div>
+ </div>
+ <input type="file" id="fileInput" accept="image/*" style="display:none">
+ <div id="debug" style="font-size:11px;color:#7C3AED;text-align:center;margin-bottom:8px"></div>
+
+ <input id="vendorName" class="input" placeholder="Your Name (e.g. Kwame Mensah)">
+ <input id="title" class="input" placeholder="Product Title">
+ <div style="display:flex;gap:10px">
+   <input id="price" type="number" class="input" placeholder="Price GH₵">
+   <select id="category" class="input"><option value="">Category</option><option>Electronics</option><option>Fashion</option><option>Books</option><option>Hostel</option><option>Food</option><option>Services</option></select>
+ </div>
+ <select id="location" class="input">
+   <option value="">📍 Select Location</option>
+   <option value="Ayensu">Ayensu - Hostels</option>
+   <option value="Science">Science - Market</option>
+   <option value="Old Site">Old Site - Campus</option>
+   <option value="Kwaprow">Kwaprow</option>
+   <option value="Apewosika">Apewosika</option>
+   <option value="Amamoma">Amamoma</option>
+   <option value="School Bus Road">School Bus Road</option>
+ </select>
+ <input id="phone" class="input" placeholder="WhatsApp 054...">
+ <textarea id="desc" class="input" placeholder="Description" rows="3"></textarea>
+
+ <!-- VERIFICATION -->
+ <label>✔️ Verification Badge (Pay to MoMo)</label>
+ <select id="verification" class="input"><option value="0">No Badge (Free)</option><option value="50">🔵 Blue - GH₵50 (Verified)</option><option value="100">🟡 Gold - GH₵100 (Trusted)</option><option value="200">🔴 Red - GH₵200 (Most Trusted)</option></select>
+ 
+ <div id="verifyMomoBox" class="momo-box">
+   <div class="momo-title" id="verifyMomoTitle">Pay for Blue Badge GH₵50</div>
+   <div>Send to MoMo:</div>
+   <div class="momo-num">0538569085<br><small style="font-size:12px">Grace Addae</small></div>
+   <div style="font-size:11px">Use Reference: <b id="momoRef1">your name</b><br>Then upload MoMo screenshot:</div>
+   <input type="file" id="verifyProofInput" accept="image/*" class="input" style="margin-top:8px">
+   <img id="verifyProofPreview" class="proof-preview">
+   <div style="font-size:10px;color:#065F46;margin-top:6px">✅ After payment, we approve badge in 10 mins - 1 hour. You will see badge on your products.</div>
+ </div>
+
+ <!-- FEATURED -->
+ <label><input type="checkbox" id="isFeatured"> 🔥 Featured? GH₵10 = 1 Day Banner (MoMo)</label><br><br>
+
+ <div id="featuredMomoBox" class="momo-box">
+   <div class="momo-title">Pay for Flyer Promo GH₵10 / Day</div>
+   <div>Send to MoMo:</div>
+   <div class="momo-num">0538569085<br><small style="font-size:12px">Grace Addae</small></div>
+   <div style="font-size:11px">Reference: <b id="momoRef2">your product title</b><br>Upload MoMo screenshot:</div>
+   <input type="file" id="featuredProofInput" accept="image/*" class="input" style="margin-top:8px">
+   <img id="featuredProofPreview" class="proof-preview">
+   <div style="font-size:10px;color:#065F46;margin-top:6px">✅ After payment, product goes to top slider for 24hrs.</div>
+ </div>
+
+ <button id="postBtn" class="btn-main">🚀 POST NOW - Live Instantly</button>
+ <p id="status" style="text-align:center;margin-top:12px;font-size:13px;color:#6D28D9"></p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA80kyQ6Wam1ejM9-ycfjlGVSC6_KMLM1Q",
+  authDomain: "unifind-ucc.firebaseapp.com",
+  projectId: "unifind-ucc",
+  storageBucket: "unifind-ucc.firebasestorage.app",
+  messagingSenderId: "741083895005",
+  appId: "1:741083895005:web:5598c8f39eea0d690ff734"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let images = [null,null,null,null];
+let verifyProof = null;
+let featuredProof = null;
+let currentIndex = 0;
+const fileInput = document.getElementById('fileInput');
+const debug = document.getElementById('debug');
+
+function compress(file, cb){
+  const r = new FileReader();
+  r.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      let w=img.width, h=img.height;
+      const max=800;
+      if(w>h){ if(w>max){ h*=max/w; w=max; } } else { if(h>max){ w*=max/h; h=max; } }
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      cb(canvas.toDataURL('image/jpeg',0.65));
+    };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+document.querySelectorAll('.upload-box').forEach(box=>{
+  box.addEventListener('click', ()=>{
+    currentIndex = parseInt(box.dataset.index);
+    fileInput.click();
+  });
+});
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  debug.textContent = "Compressing Photo "+(currentIndex+1)+"...";
+  compress(file, compressed=>{
+    images[currentIndex] = compressed;
+    const preview = document.getElementById('preview'+currentIndex);
+    preview.src = compressed;
+    preview.style.display = 'block';
+    document.querySelector(`.upload-box[data-index="${currentIndex}"]`).classList.add('has-img');
+    debug.textContent = `✅ Photo ${currentIndex+1} ready!`;
+  });
+  e.target.value='';
+});
+
+// Verification MoMo show/hide
+const verificationSelect = document.getElementById('verification');
+const verifyBox = document.getElementById('verifyMomoBox');
+const verifyTitle = document.getElementById('verifyMomoTitle');
+verificationSelect.addEventListener('change', ()=>{
+  const val = verificationSelect.value;
+  if(val!=="0"){
+    verifyBox.classList.add('show');
+    const colors = {50:"Blue",100:"Gold",200:"Red"};
+    verifyTitle.textContent = `Pay for ${colors[val]} Badge GH₵${val}`;
+  } else {
+    verifyBox.classList.remove('show');
+    verifyProof = null;
+  }
+});
+const featuredCheck = document.getElementById('isFeatured');
+const featuredBox = document.getElementById('featuredMomoBox');
+featuredCheck.addEventListener('change', ()=>{
+  if(featuredCheck.checked){ featuredBox.classList.add('show'); } 
+  else { featuredBox.classList.remove('show'); featuredProof=null; }
+});
+
+// Proof uploads
+document.getElementById('verifyProofInput').addEventListener('change', e=>{
+  compress(e.target.files[0], c=>{
+    verifyProof = c;
+    const p = document.getElementById('verifyProofPreview');
+    p.src = c; p.style.display='block';
+  });
+});
+document.getElementById('featuredProofInput').addEventListener('change', e=>{
+  compress(e.target.files[0], c=>{
+    featuredProof = c;
+    const p = document.getElementById('featuredProofPreview');
+    p.src = c; p.style.display='block';
+  });
+});
+
+// Refs
+document.getElementById('vendorName').addEventListener('input', e=>{
+  document.getElementById('momoRef1').textContent = e.target.value || 'your name';
+});
+document.getElementById('title').addEventListener('input', e=>{
+  document.getElementById('momoRef2').textContent = e.target.value || 'your product';
+});
+
+const coordsMap = {
+ "Ayensu":[5.119,-1.285],
+ "Science":[5.116,-1.276],
+ "Old Site":[5.1036,-1.2823],
+ "Kwaprow":[5.124,-1.29],
+ "Apewosika":[5.108,-1.295],
+ "Amamoma":[5.122,-1.280],
+ "School Bus Road":[5.112,-1.278]
+};
+
+document.getElementById('postBtn').addEventListener('click', async()=>{
+  const imgs = images.filter(Boolean);
+  const vendorNameInput = document.getElementById('vendorName').value.trim();
+  const title = document.getElementById('title').value.trim();
+  const price = document.getElementById('price').value.trim();
+  const category = document.getElementById('category').value;
+  const loc = document.getElementById('location').value;
+  const phone = document.getElementById('phone').value.trim();
+  const desc = document.getElementById('desc').value.trim();
+  const isFeatured = document.getElementById('isFeatured').checked;
+  const verification = parseInt(document.getElementById('verification').value);
+  const status = document.getElementById('status');
+  const btn = document.getElementById('postBtn');
+
+  if(imgs.length===0){ alert("Add at least 1 photo"); return; }
+  if(!vendorNameInput||!title||!price||!category||!loc||!phone){ alert("Fill all fields"); return; }
+  if(verification>0 && !verifyProof){ alert(`You selected GH₵${verification} verification - Please upload MoMo screenshot for 0538569085`); return; }
+  if(isFeatured && !featuredProof){ alert("You checked Featured GH₵10 - Please upload MoMo screenshot for 0538569085"); return; }
+
+  status.textContent = "Posting...";
+  btn.disabled = true;
+
+  try{
+    const c = coordsMap[loc]||[5.115,-1.2823];
+    const mainImg = imgs[0];
+    
+    // Save product
+    const docRef = await addDoc(collection(db,"products"),{
+      title, name:title, price:Number(price), category, location:loc,
+      lat:c[0], lng:c[1], phone, desc, description:desc,
+      image:mainImg, imageUrl:mainImg, mainImage:mainImg,
+      images:imgs,
+      vendorName: vendorNameInput,
+      flyerUrl:isFeatured?mainImg:null, 
+      isFeatured: isFeatured ? false : false, // false until you approve after checking MoMo
+      isFeaturedPending: isFeatured,
+      featuredProof: featuredProof,
+      featuredUntil: null,
+      verificationAmount: verification,
+      verificationProof: verifyProof,
+      verificationStatus: verification>0 ? "pending" : "none", // pending until you approve
+      momoNumber: "0538569085",
+      momoName: "Grace Addae",
+      createdAt: serverTimestamp()
+    });
+
+    // Also save to momo_payments collection for easy check
+    if(verification>0 || isFeatured){
+      await addDoc(collection(db,"momo_payments"),{
+        type: verification>0 && isFeatured ? "verification+featured" : verification>0 ? "verification" : "featured",
+        amount: (verification + (isFeatured?10:0)),
+        vendorName: vendorNameInput,
+        phone: phone,
+        productTitle: title,
+        productId: docRef.id,
+        verificationAmount: verification,
+        isFeatured: isFeatured,
+        verifyProof: verifyProof,
+        featuredProof: featuredProof,
+        momoTo: "0538569085 Grace Addae",
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+    }
+
+    localStorage.setItem('unifind_vendorName', vendorNameInput);
+    localStorage.setItem('unifind_vendorPhone', phone);
+    status.textContent="✅ Posted! ID: "+docRef.id+" - We will approve badge/flyer after checking MoMo 0538569085";
+    setTimeout(()=>{ window.location.href="index.html"; }, 1500);
+  }catch(err){
+    console.error(err);
+    status.textContent="❌ Error: "+err.message;
+    btn.disabled = false;
+  }
+});
+
+const savedName = localStorage.getItem('unifind_vendorName');
+if(savedName) document.getElementById('vendorName').value = savedName;
+const savedPhone = localStorage.getItem('unifind_vendorPhone');
+if(savedPhone) document.getElementById('phone').value = savedPhone;
+</script>
+
+<!-- PAYSTACK FOR LATER - UNCOMMENT WHEN YOU GET KEY
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+function payWithPaystack(amount, type){
+  PaystackPop.setup({
+    key: 'pk_live_YOUR_KEY_HERE',
+    email: document.getElementById('vendorName').value + '@ucc.edu',
+    amount: amount * 100,
+    callback: function(res){ alert('Paid! '+type+' approved'); }
+  }).openIframe();
+}
+</script>
+-->
+
+</body>
+</html>

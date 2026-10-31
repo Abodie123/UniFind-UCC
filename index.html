@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniFind UCC | Hottest Marketplace in UCC</title>
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#7C3AED">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial;background:#f8f9fa}
+.header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:white;border-top:4px solid #DC2626;position:sticky;top:0;z-index:100}
+.top-promo{background:#FEF3C7;color:#92400E;text-align:center;padding:6px;font-size:11px;font-weight:700}
+.install-banner{background:linear-gradient(90deg,#7C3AED,#F97316);color:white;padding:10px 14px;text-align:center;font-size:12px;font-weight:700;display:flex;justify-content:center;align-items:center;gap:8px;position:sticky;top:58px;z-index:99}
+.search-bar{display:flex;align-items:center;gap:8px;background:white;margin:10px 14px;padding:8px 12px;border-radius:24px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.search-bar input{flex:1;border:none;outline:none;font-size:13px}
+.category-bar{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;white-space:nowrap} .category-bar::-webkit-scrollbar{display:none}
+.category-bar button{border:1px solid #E5E7EB;background:white;padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer} .category-bar button.active{background:#7C3AED;color:white}
+.flyer-slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:12px 14px;scroll-behavior:smooth} .flyer-slider::-webkit-scrollbar{display:none}
+.flyer{min-width:100%;scroll-snap-align:center;position:relative;border-radius:16px;overflow:hidden;height:280px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.08);background:white;display:flex}
+.flyer-img{width:55%;height:100%;object-fit:cover}
+.flyer-content{width:45%;padding:14px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(135deg,#7C3AED,#F97316);color:white}
+.flyer-content h2{font-size:16px;line-height:1.2}
+.flyer-buy{background:white;color:#7C3AED;border:none;padding:8px 14px;border-radius:20px;font-weight:800;font-size:12px;cursor:pointer;margin-top:8px}
+.dots{text-align:center;padding:8px} .dot{width:8px;height:8px;background:#ddd;border-radius:50%;display:inline-block;margin:0 3px} .dot.active{background:#7C3AED;width:20px}
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px}
+.card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer}
+.card img{width:100%;height:140px;object-fit:cover}
+.info{padding:8px} .name{font-size:13px;font-weight:600;height:32px;overflow:hidden} .price{color:#7C3AED;font-weight:800;font-size:14px}
+.vendor-row{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:10px;color:#666}
+.verify-badge{width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:900}
+.v-blue{background:#3B82F6} .v-gold{background:#F59E0B} .v-red{background:#DC2626}
+.buy-btn{width:100%;margin-top:6px;background:linear-gradient(90deg,#7C3AED,#F97316);color:white;border:none;padding:6px;border-radius:8px;font-size:11px;font-weight:700}
+.map-box{margin:14px;background:white;border-radius:16px;padding:12px} #map{height:280px;border-radius:12px;margin-top:8px;z-index:1}
+.footer{background:#111827;color:white;text-align:center;padding:20px;margin-top:14px;border-radius:16px 16px 0 0}
+</style>
+</head>
+<body>
+<div class="header">
+<div style="display:flex;align-items:center;gap:8px"><img src="icon-192.png" style="width:32px;border-radius:8px"><b>UniFind.</b></div>
+<div style="display:flex;gap:8px;align-items:center">
+<a href="login.html" id="loginHeaderBtn" style="background:white;color:#7C3AED;border:1px solid #7C3AED;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none">👤 Login</a>
+<a href="vendor.html" style="background:linear-gradient(90deg,#7C3AED,#F97316);color:white;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none">+ Sell Now</a>
+</div>
+</div>
+
+<div id="installBanner" class="install-banner" style="display:none">
+  <span>📲 Install UniFind App - Use Offline</span>
+  <button id="installBtn" style="background:white;color:#7C3AED;border:none;padding:5px 12px;border-radius:20px;font-weight:800;cursor:pointer">Install Now</button>
+  <span id="closeInstall" style="cursor:pointer;background:rgba(255,255,255,.3);width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">✕</span>
+</div>
+
+<div class="top-promo">🚚 FREE DELIVERY IN AYENSU TODAY! • GH₵10 = 1 Day Flyer</div>
+<div class="search-bar"><span>🔍</span><input type="text" id="searchInput" placeholder="Search 1000+ items in UCC..."></div>
+<div class="category-bar"><button class="active" data-cat="all">📦 All</button><button data-cat="Electronics">💻 Electronics</button><button data-cat="Fashion">👕 Fashion</button><button data-cat="Books">📚 Books</button><button data-cat="Hostel">🏠 Hostel</button><button data-cat="Food">🍔 Food</button><button data-cat="Services">🛠️ Services</button></div>
+
+<div class="flyer-slider" id="flyerSlider"></div>
+<div class="dots" id="dots"></div>
+
+<div style="padding:12px 14px 0;display:flex;justify-content:space-between"><b style="color:#7C3AED">Fresh Drops <span style="background:#F97316;color:white;padding:2px 6px;border-radius:6px;font-size:10px">Live</span></b></div>
+<div id="productGrid" class="product-grid"></div>
+<div class="map-box"><h3 style="color:#7C3AED">📍 Business Map • UCC</h3><div id="map"></div></div>
+<div class="footer"><h3>UniFind-UCC</h3><p style="font-size:12px">© 2026 - Buy & Sell in UCC in 5 mins</p><p style="margin-top:8px"><a href="login.html" style="color:#F97316">Become a Seller - Login / Sign Up</a></p></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = { apiKey: "AIzaSyA80kyQ6Wam1ejM9-ycfjlGVSC6_KMLM1Q", authDomain: "unifind-ucc.firebaseapp.com", projectId: "unifind-ucc", storageBucket: "unifind-ucc.firebasestorage.app", messagingSenderId: "741083895005", appId: "1:741083895005:web:5598c8f39eea0d690ff734" };
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+
+let map = L.map('map').setView([5.115,-1.2823],13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'UCC'}).addTo(map);
+
+function getVerifyBadge(amount){
+ amount=Number(amount||0);
+ if(amount>=200) return `<span class="verify-badge v-red">✔</span>`;
+ if(amount>=100) return `<span class="verify-badge v-gold">✔</span>`;
+ if(amount>=50) return `<span class="verify-badge v-blue">✔</span>`;
+ return '';
+}
+function isFeaturedValid(p){
+ if(!p.isFeatured) return false;
+ if(!p.featuredUntil) return true;
+ const until = p.featuredUntil.toDate ? p.featuredUntil.toDate() : new Date(p.featuredUntil);
+ return until > new Date();
+}
+async function loadAll(){
+ const q = query(collection(db,"products"), orderBy("createdAt","desc"));
+ const snap = await getDocs(q);
+ const grid = document.getElementById('productGrid');
+ const slider = document.getElementById('flyerSlider');
+ grid.innerHTML=''; 
+ slider.innerHTML=`<div class="flyer"><img src="banner-purple.png" class="flyer-img" style="object-fit:contain;background:white"><div class="flyer-content"><h2>Buy & Sell In 5 Mins</h2><p style="font-size:11px">Trusted UCC Marketplace</p><button class="flyer-buy" onclick="location.href='vendor.html'">Sell Now</button></div></div>`;
+ snap.forEach(docSnap=>{
+  const p = docSnap.data(); const id = docSnap.id;
+  const img = p.image || p.imageUrl || p.mainImage || (p.images ? p.images[0] : 'icon-192.png');
+  const badge = getVerifyBadge(p.verificationAmount);
+  const vendorName = p.vendorName || 'UCC Vendor';
+  if(isFeaturedValid(p)){
+    slider.innerHTML += `<div class="flyer"><img src="${img}" class="flyer-img"><div class="flyer-content"><h2>${p.title||''}</h2><p style="font-size:13px;margin-top:4px">GH₵${p.price} • ${p.location}</p><div style="display:flex;align-items:center;gap:4px;margin-top:6px;font-size:11px">${vendorName} ${badge}</div><button class="flyer-buy" onclick="location.href='product-detail.html?id=${id}'">BUY NOW</button></div></div>`;
+  }
+  grid.innerHTML += `<div class="card" data-category="${p.category||''}" onclick="location.href='product-detail.html?id=${id}'"><img src="${img}"><div class="info"><div class="name">${p.title||''}</div><div class="price">GH₵${p.price||0}</div><div class="vendor-row">${vendorName} ${badge} ${badge?'<span style="color:#3B82F6;font-weight:700">Verified</span>':''}</div><button class="buy-btn">Buy Now</button></div></div>`;
+  if(p.lat&&p.lng) L.marker([p.lat,p.lng]).addTo(map).bindPopup(`${p.title}<br>${vendorName} GH₵${p.price}`);
+ });
+ initDots();
+}
+loadAll();
+let cur=0;
+function autoSwipe(){ const s=document.getElementById('flyerSlider'); const f=s.querySelectorAll('.flyer'); if(f.length<=1) return; cur=(cur+1)%f.length; s.scrollTo({left:s.clientWidth*cur,behavior:'smooth'}); document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===cur)); }
+setInterval(autoSwipe,3000);
+function initDots(){ setTimeout(()=>{ const c=document.getElementById('flyerSlider').querySelectorAll('.flyer').length; const d=document.getElementById('dots'); d.innerHTML=''; for(let i=0;i<c;i++) d.innerHTML+=`<span class="dot ${i===0?'active':''}"></span>`; },500); }
+
+document.querySelectorAll('.category-bar button').forEach(btn=>{
+ btn.addEventListener('click',()=>{
+  document.querySelectorAll('.category-bar button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const cat = btn.dataset.cat.toLowerCase();
+  document.querySelectorAll('.card').forEach(c=>{
+   const cardCat = (c.dataset.category || '').toLowerCase();
+   if(cat==='all' || cardCat===cat) c.style.display='block';
+   else c.style.display='none';
+  });
+ });
+});
+document.getElementById('searchInput').addEventListener('input',(e)=>{ const q=e.target.value.toLowerCase(); document.querySelectorAll('.card').forEach(c=>{ c.style.display=c.innerText.toLowerCase().includes(q)?'block':'none'; }); });
+
+// Show logged in user name on login button
+const vName = localStorage.getItem('vendorName');
+if(vName){
+  document.getElementById('loginHeaderBtn').innerHTML = `👋 ${vName.split(' ')[0]}`;
+  document.getElementById('loginHeaderBtn').href = 'vendor.html';
+}
+</script>
+
+<script>
+// --- PWA INSTALL FIX ---
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+let deferredPrompt = null;
+const banner = document.getElementById('installBanner');
+const installBtn = document.getElementById('installBtn');
+const closeBtn = document.getElementById('closeInstall');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if(!localStorage.getItem('installClosed')) banner.style.display = 'flex';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') banner.style.display = 'none';
+    deferredPrompt = null;
+  } else {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      alert("iPhone: Tap Share button -> Add to Home Screen to install");
+    } else {
+      alert("To install UniFind:\n1. Tap ⋮ menu top-right\n2. Tap Install App / Add to Home Screen\nNote: Install only shows after hosting with HTTPS");
+    }
+  }
+});
+
+closeBtn.addEventListener('click', () => {
+  banner.style.display = 'none';
+  localStorage.setItem('installClosed','1');
+});
+
+window.addEventListener('appinstalled', () => {
+  banner.style.display = 'none';
+  localStorage.setItem('installClosed','1');
+});
+</script>
+</body>
+</html>

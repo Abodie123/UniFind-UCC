@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - UniFind UCC - MoMo 0538569085</title>
+<link rel="icon" href="icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#F5F3FF;padding-bottom:40px}
+.header{background:linear-gradient(135deg,#111827,#7C3AED);color:white;padding:14px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.header a{color:white;text-decoration:none;background:rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-size:12px}
+.btn-small{padding:6px 10px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px}
+.tab{padding:10px 16px;border:none;border-radius:20px;font-weight:700;cursor:pointer;background:#E5E7EB;margin-right:6px}
+.tab.active{background:#7C3AED;color:white}
+.grid{display:grid;grid-template-columns:1fr;gap:12px;padding:12px}
+.card{background:white;border-radius:16px;padding:12px;display:flex;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.card img{width:90px;height:90px;object-fit:cover;border-radius:12px}
+.info{flex:1}
+.badge{display:inline-flex;padding:2px 6px;border-radius:20px;font-size:10px;font-weight:700}
+.v-blue{background:#DBEAFE;color:#1D4ED8} .v-gold{background:#FEF3C7;color:#92400E} .v-red{background:#FEE2E2;color:#991B1B}
+.proof-img{width:100%;max-width:200px;border-radius:8px;margin-top:6px;border:1px solid #10B981;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="header">
+<div><b>ADMIN - MoMo: 0538569085 Grace Addae</b></div>
+<div><a href="index.html">Home</a> <a href="vendor.html">Post</a></div>
+</div>
+
+<div style="background:white;margin:12px;padding:12px;border-radius:12px;">
+<div style="margin-bottom:10px">
+<button id="tabProducts" class="tab active" onclick="switchTab('products')">📦 Products</button>
+<button id="tabPayments" class="tab" onclick="switchTab('payments')">💰 MoMo Payments Pending (<span id="pendingCount">0</span>)</button>
+<button onclick="load()" style="padding:6px 12px;border-radius:8px;border:none;background:#111827;color:white;font-size:11px;cursor:pointer">🔄 Refresh</button>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<b id="count">Loading...</b>
+<select id="filterCat"><option value="all">All Categories</option><option>Electronics</option><option>Fashion</option><option>Books</option><option>Hostel</option><option>Food</option><option>Services</option></select>
+<select id="filterBadge"><option value="all">All Badges</option><option value="0">No Badge</option><option value="50">Blue</option><option value="100">Gold</option><option value="200">Red</option></select>
+</div>
+</div>
+
+<div id="productList" class="grid"></div>
+<div id="paymentList" class="grid" style="display:none"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA80kyQ6Wam1ejM9-ycfjlGVSC6_KMLM1Q",
+  authDomain: "unifind-ucc.firebaseapp.com",
+  projectId: "unifind-ucc",
+  storageBucket: "unifind-ucc.firebasestorage.app",
+  messagingSenderId: "741083895005",
+  appId: "1:741083895005:web:5598c8f39eea0d690ff734"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allProducts=[]; let allPayments=[]; let currentTab='products';
+
+function switchTab(t){
+ currentTab=t;
+ document.getElementById('tabProducts').classList.toggle('active', t==='products');
+ document.getElementById('tabPayments').classList.toggle('active', t==='payments');
+ document.getElementById('productList').style.display = t==='products' ? 'grid' : 'none';
+ document.getElementById('paymentList').style.display = t==='payments' ? 'grid' : 'none';
+ if(t==='products') renderProducts(); else renderPayments();
+}
+window.switchTab = switchTab;
+
+async function load(){
+ const q1 = query(collection(db,"products"), orderBy("createdAt","desc"));
+ const snap1 = await getDocs(q1);
+ allProducts=[]; snap1.forEach(d=> allProducts.push({id:d.id, ...d.data()}));
+ 
+ const q2 = query(collection(db,"momo_payments"), orderBy("createdAt","desc"));
+ const snap2 = await getDocs(q2);
+ allPayments=[]; snap2.forEach(d=> allPayments.push({id:d.id, ...d.data()}));
+ 
+ document.getElementById('pendingCount').textContent = allPayments.filter(p=>p.status==='pending').length;
+ renderProducts();
+}
+window.load = load;
+
+function getBadgeInfo(amount){
+ amount=Number(amount||0);
+ if(amount>=200) return {label:'Red Most Trusted',cls:'v-red'};
+ if(amount>=100) return {label:'Gold Trusted',cls:'v-gold'};
+ if(amount>=50) return {label:'Blue Verified',cls:'v-blue'};
+ return {label:'No Badge',cls:''};
+}
+
+function renderProducts(){
+ const cat = document.getElementById('filterCat').value;
+ const badgeFilter = document.getElementById('filterBadge').value;
+ const list = document.getElementById('productList');
+ list.innerHTML='';
+ let filtered = allProducts.filter(p=>{
+  if(cat!=='all' && (p.category||'')!==cat) return false;
+  if(badgeFilter!=='all' && String(p.verificationAmount||0)!==badgeFilter) return false;
+  return true;
+ });
+ document.getElementById('count').textContent = `${filtered.length} products (Total ${allProducts.length})`;
+ filtered.forEach(p=>{
+  const b = getBadgeInfo(p.verificationAmount);
+  const img = p.mainImage || p.image || 'icon-192.png';
+  const vendor = p.vendorName || 'UCC Vendor';
+  const div = document.createElement('div');
+  div.className='card';
+  div.innerHTML=`
+   <img src="${img}">
+   <div class="info">
+    <div style="font-weight:700;font-size:13px">${p.title||''} - GH₵${p.price||0} ${p.verificationStatus==='pending' ? '⏳ PAY PENDING' : ''} ${p.isFeaturedPending ? '🔥 FLYER PENDING' : ''}</div>
+    <div style="font-size:11px;color:#666">👤 ${vendor} <span class="badge ${b.cls}">${b.label}</span> ${p.verificationStatus ? '['+p.verificationStatus+']' : ''}</div>
+    <div style="font-size:10px;color:#888">${p.category||''} • ${p.location||''} • ${p.phone||''}</div>
+    ${p.verificationProof ? `<div style="font-size:10px;margin-top:4px">✔️ Proof:<br><img src="${p.verificationProof}" class="proof-img" onclick="window.open(this.src)"></div>` : ''}
+    ${p.featuredProof ? `<div style="font-size:10px;margin-top:4px">🔥 Flyer Proof:<br><img src="${p.featuredProof}" class="proof-img" onclick="window.open(this.src)"></div>` : ''}
+    <div style="margin-top:8px">
+     <button class="btn-small" style="background:#10B981;color:white" data-approve-v="${p.id}">✅ Approve Badge GH₵${p.verificationAmount||0}</button>
+     <button class="btn-small" style="background:#F59E0B;color:white" data-approve-f="${p.id}">🔥 Approve Flyer GH₵10</button>
+     <button class="btn-small" style="background:#EF4444;color:white" data-del="${p.id}">Delete</button>
+    </div>
+   </div>
+  `;
+  list.appendChild(div);
+ });
+ attachProductEvents();
+}
+
+function renderPayments(){
+ const list = document.getElementById('paymentList');
+ list.innerHTML='';
+ const pending = allPayments.filter(p=>p.status==='pending');
+ document.getElementById('count').textContent = `${pending.length} pending MoMo payments to 0538569085`;
+ if(pending.length===0){ list.innerHTML='<div style="background:white;padding:20px;border-radius:12px;text-align:center">No pending payments ✅ All approved</div>'; return; }
+ pending.forEach(pay=>{
+  const div = document.createElement('div');
+  div.className='card';
+  div.innerHTML=`
+   <div class="info">
+    <div style="font-weight:700">💰 ${pay.type} - GH₵${pay.amount} - ${pay.vendorName}</div>
+    <div style="font-size:11px">Product: ${pay.productTitle} • Phone: ${pay.phone}</div>
+    <div style="font-size:10px;color:#666">MoMo to: ${pay.momoTo} • ${pay.createdAt ? new Date(pay.createdAt.seconds*1000).toLocaleString() : ''}</div>
+    <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+     ${pay.verifyProof ? `<div><small>Verify Proof</small><br><img src="${pay.verifyProof}" class="proof-img" onclick="window.open(this.src)"></div>` : ''}
+     ${pay.featuredProof ? `<div><small>Flyer Proof</small><br><img src="${pay.featuredProof}" class="proof-img" onclick="window.open(this.src)"></div>` : ''}
+    </div>
+    <div style="margin-top:8px">
+     <button class="btn-small" style="background:#10B981;color:white" data-pay-approve="${pay.id}" data-prod="${pay.productId}">✅ Approve & Give Badge/Flyer</button>
+     <button class="btn-small" style="background:#EF4444;color:white" data-pay-reject="${pay.id}">❌ Reject</button>
+    </div>
+   </div>
+  `;
+  list.appendChild(div);
+ });
+ attachPaymentEvents();
+}
+
+function attachProductEvents(){
+ document.querySelectorAll('[data-approve-v]').forEach(b=>{
+  b.onclick=async()=>{
+   const id=b.dataset.approveV;
+   await updateDoc(doc(db,"products",id),{verificationStatus:"approved"});
+   alert('Badge approved! Vendor now verified');
+   load();
+  };
+ });
+ document.querySelectorAll('[data-approve-f]').forEach(b=>{
+  b.onclick=async()=>{
+   const id=b.dataset.approveF;
+   await updateDoc(doc(db,"products",id),{isFeatured:true, isFeaturedPending:false, featuredUntil:new Date(Date.now()+86400000), flyerUrl: allProducts.find(x=>x.id===id).mainImage});
+   alert('Flyer approved! 24hrs top banner');
+   load();
+  };
+ });
+ document.querySelectorAll('[data-del]').forEach(b=>{
+  b.onclick=async()=>{ if(!confirm('Delete?')) return; await deleteDoc(doc(db,"products",b.dataset.del)); load(); };
+ });
+}
+function attachPaymentEvents(){
+ document.querySelectorAll('[data-pay-approve]').forEach(b=>{
+  b.onclick=async()=>{
+   const payId=b.dataset.payApprove; const prodId=b.dataset.prod;
+   const pay = allPayments.find(x=>x.id===payId);
+   const prod = allProducts.find(x=>x.id===prodId);
+   if(prod){
+     const updates={};
+     if(pay.verificationAmount>0){ updates.verificationStatus="approved"; }
+     if(pay.isFeatured){ updates.isFeatured=true; updates.isFeaturedPending=false; updates.featuredUntil=new Date(Date.now()+86400000); updates.flyerUrl=prod.mainImage||prod.image; }
+     await updateDoc(doc(db,"products",prodId), updates);
+   }
+   await updateDoc(doc(db,"momo_payments",payId),{status:"approved"});
+   alert('Payment approved! Product updated');
+   load();
+  };
+ });
+ document.querySelectorAll('[data-pay-reject]').forEach(b=>{
+  b.onclick=async()=>{ await updateDoc(doc(db,"momo_payments",b.dataset.payReject),{status:"rejected"}); load(); };
+ });
+}
+document.getElementById('filterCat').onchange=()=>{ if(currentTab==='products') renderProducts(); };
+document.getElementById('filterBadge').onchange=()=>{ if(currentTab==='products') renderProducts(); };
+load();
+</script>
+</body>
+</html>
